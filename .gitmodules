@@ -1,3 +1,6 @@
 [submodule "03_Getting_and_Cleaning_Data"]
 	path = 03_Getting_and_Cleaning_Data
 	url = git@github.com:olistroemer/dsc_03_project.git
+[submodule "05_Reproducible_Research/Week2_Project"]
+	path = 05_Reproducible_Research/Week2_Project
+	url = git@github.com:olistroemer/dsc_05-01_project.git
