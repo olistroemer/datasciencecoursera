@@ -126,7 +126,9 @@ aggregate the data by the mean health impact per event.
 evtohealth <- aggregate(data$HEALTH_IMPACT, by=list(data$EVTYPE), mean)
 evtohealth <- head(evtohealth[order(evtohealth$x, decreasing = T),], 10)
 par(mar = c(10,4,2,2))
-barplot(evtohealth$x, names.arg = evtohealth$Group.1, ylab="Health Impact", las=2)
+barplot(evtohealth$x, names.arg = evtohealth$Group.1,
+        ylab="Health Impact", las=2,
+        main="The ten most harmful weather events to populaton health")
 ```
 
 As we can see in the bar plot above, excessive heat and heat kill or injure with
@@ -141,7 +143,9 @@ above the mean damage accumulated by the event.
 evtohealth <- aggregate(data$CLEAN_DAMAGE, by=list(data$EVTYPE), mean)
 evtohealth <- head(evtohealth[order(evtohealth$x, decreasing = T),], 10)
 par(mar = c(10,4,2,2))
-barplot(evtohealth$x / 10^6, names.arg = evtohealth$Group.1, ylab="Economic Damage in M$", las=2)
+barplot(evtohealth$x / 10^6, names.arg = evtohealth$Group.1,
+        ylab="Economic Damage in M$", las=2,
+        main="The ten most economically damaging weather events")
 ```
 
 Tropical storms have on average almost double the economic impact as drought on
