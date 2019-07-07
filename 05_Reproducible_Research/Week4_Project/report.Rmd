@@ -1,0 +1,149 @@
+---
+title: "Impact of Weather Events on Population Health and the Economy"
+author: "Oliver Stroemer"
+date: 2019-07-07
+output: html_document
+---
+
+## Synopsis
+
+In this report we want to evaluate the impact of weather events on population
+health and the economy in the United States. Specifically we ask the questions,
+which types of weather events are the most harmful and which have the greatest
+impact on the economy. We obtained NCDC Storm Events Database with data for all
+the United States from 1950 to 2011. From these data we found that the events
+doing the most harm to population health are extreme heat and heat and the
+events damaging the economy most are tropical storms.
+
+## Loading libraries that are necessary for our evaluation
+
+We will use data.table instead of the standard data.frame, because of the
+massive amount of data we have to deal with.
+
+```{r}
+library(data.table)
+```
+
+## Loading and processing the raw data
+
+First we need to download the file. It must be 49,177,144 bytes. ([Source][1])
+
+[1]: https://www.coursera.org/learn/reproducible-research/discussions/weeks/4/threads/38y35MMiEeiERhLphT2-QA
+
+```{r cache=TRUE}
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2",
+              "StormData.csv.bz2")
+file.size("StormData.csv.bz2")
+```
+
+For the questions, we want to answer in this analysis, we don't need all the
+variables included in the data set. To speed up the loading process, only
+relevant columns of the table are read.
+
+The set must have 902297 records. ([Source][1])
+
+```{r cache=TRUE}
+data <- fread("StormData.csv.bz2",
+              sep = ",",
+              select = c("EVTYPE",                    # Type of event
+                         "FATALITIES", "INJURIES",    # Number of fatalities/injuries
+                         "PROPDMG", "PROPDMGEXP",     # Damage to property and exponent
+                         "CROPDMG", "CROPDMGEXP"))    # Damage to crop and exponent
+dim(data)
+```
+
+### Clean up event types
+
+There should be 48 different events in the data set. Unfortunately there are
+about 1000.
+
+```{r}
+length(unique(data$EVTYPE))
+```
+
+Many of them are introduced though typos or abbreviations. For our analysis we
+only want reliable data, so we remove all events which occurred less than 320
+times. Using this threshold value we reduce the number of events to 48. This
+also ensures, we only analyze events, for which we have enough data to calculate
+universally valid summaries.
+
+```{r}
+events <- table(data$EVTYPE)
+data <- data[data$EVTYPE %in% names(events[events >= 320])]
+length(unique(data$EVTYPE))
+nrow(data)
+```
+
+### Calculate property and crop damage
+
+The data regarding the damage is really messy. Since we are dealing with values
+in the billions, we can safely ignore smaller values.
+
+PROPDMGEXP and CROPDMGEXP are the exponential values for PROPDMG and CROPDMG
+respectively. Sometimes letters are used, sometimes numbers and even symbols
+that indicate certainty. More detailed information can be found in [this
+document][2]. Our clean up process conforms with the steps described in the
+document. We ignore every value that isn't K, M or B.
+
+[2]: https://rstudio-pubs-static.s3.amazonaws.com/58957_37b6723ee52b455990e149edde45e5b6.html
+
+We assign our new damage value to CLEAN_DAMAGE in data.
+
+```{r}
+data$CLEAN_DAMAGE <- 0
+
+data[data$PROPDMGEXP == "K"]$CLEAN_DAMAGE <- data[data$PROPDMGEXP == "K"]$PROPDMG * 10^3
+data[data$PROPDMGEXP == "M"]$CLEAN_DAMAGE <- data[data$PROPDMGEXP == "M"]$PROPDMG * 10^6
+data[data$PROPDMGEXP == "B"]$CLEAN_DAMAGE <- data[data$PROPDMGEXP == "B"]$PROPDMG * 10^9
+
+data[data$CROPDMGEXP == "K"]$CLEAN_DAMAGE <- data[data$CROPDMGEXP == "K"]$CROPDMG + data[data$CROPDMGEXP == "K"]$CROPDMG * 10^3
+data[data$CROPDMGEXP == "M"]$CLEAN_DAMAGE <- data[data$CROPDMGEXP == "M"]$CROPDMG + data[data$CROPDMGEXP == "M"]$CROPDMG * 10^6
+data[data$CROPDMGEXP == "B"]$CLEAN_DAMAGE <- data[data$CROPDMGEXP == "B"]$CROPDMG + data[data$CROPDMGEXP == "B"]$CROPDMG * 10^9
+```
+
+
+
+### Health impact
+
+We need a variable to measure health impact derived from the number of
+fatalities and injuries. We assess one fatality as the proportion of the mean of
+injuries to the mean of fatalities which is about 10:1.
+
+```{r}
+injtofat <- mean(data$INJURIES) / mean(data$FATALITIES)
+injtofat
+data$HEALTH_IMPACT <- data$FATALITIES * injtofat + data$INJURIES
+```
+
+## Results
+
+### Which types of events are most harmful with respect to population health?
+
+We will look at the top ten events harming population health. For this we'll
+aggregate the data by the mean health impact per event.
+
+```{r}
+evtohealth <- aggregate(data$HEALTH_IMPACT, by=list(data$EVTYPE), mean)
+evtohealth <- head(evtohealth[order(evtohealth$x, decreasing = T),], 10)
+par(mar = c(10,4,2,2))
+barplot(evtohealth$x, names.arg = evtohealth$Group.1, ylab="Health Impact", las=2)
+```
+
+As we can see in the bar plot above, excessive heat and heat kill or injure with
+a great margin most people on average.
+
+### Which types of events have the greatest economic consequences?
+
+Again we'll look at the top ten events. Our measure will be as in the question
+above the mean damage accumulated by the event.
+
+```{r}
+evtohealth <- aggregate(data$CLEAN_DAMAGE, by=list(data$EVTYPE), mean)
+evtohealth <- head(evtohealth[order(evtohealth$x, decreasing = T),], 10)
+par(mar = c(10,4,2,2))
+barplot(evtohealth$x / 10^6, names.arg = evtohealth$Group.1, ylab="Economic Damage in M$", las=2)
+```
+
+Tropical storms have on average almost double the economic impact as drought on
+the second place. Heat, which has the greatest impact on health, is only on
+place ten.
