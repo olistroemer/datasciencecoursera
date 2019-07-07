@@ -24,7 +24,7 @@ massive amount of data we have to deal with.
 library(data.table)
 ```
 
-## Loading and processing the raw data
+## Data Processing: Loading and processing the raw data
 
 First we need to download the file. It must be 49,177,144 bytes. ([Source][1])
 
