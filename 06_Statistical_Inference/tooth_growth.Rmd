@@ -66,7 +66,8 @@ for the 2 mg/day seems much higher using ascorbic acid.
 ### More vitamin c means longer teeth
 
 We state that a dose of 2 mg/day of vitamin C of either supplement type leads to
-longer teeth. $H_{0}: \mu = \mu_{0}$ vs. $H_{a}: \mu > \mu_{0}$.
+longer teeth than a dose of 0.5 mg/day or 1 mg/day. $H_{0}: \mu = \mu_{0}$ vs.
+$H_{a}: \mu > \mu_{0}$.
 
 An unpaired, one-sided, two sample t-test is used to check our hypothesis.
 
