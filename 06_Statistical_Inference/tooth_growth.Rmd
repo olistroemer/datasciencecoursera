@@ -1,0 +1,99 @@
+---
+title: "The Effect of Vitamin C on the Tooth Growth of Guinea Pigs"
+author: "Oliver Stroemer"
+date: "2019-07-16"
+output: pdf_document
+---
+
+## Synopsis
+
+In this project we are going to explore the ToothGrowth data set from the R
+datasets package and compare the tooth growth of guinea pigs in response to the
+administration of vitamin C by supplement type and dose via hypothesis tests.
+
+We conclude that the dosage highly affects tooth growth with higher dosage
+leading to longer teeth ($p < 0.001$) and that the supplement as orange juice is
+more effective than pure ascorbic acid for small dosages ($p = 0.002$).
+
+## Load libraries
+```{r}
+library(lattice)
+```
+
+## Load the data in R
+
+First we need to load the data. There should be 60 observations of 3 variables
+as described in the R help page of the ToothGrowth data set obtained by
+`?ToothGrowth`.
+
+```{r}
+data("ToothGrowth")
+dim(ToothGrowth)
+```
+
+## Summary of the data
+
+Let's have a quick look at a summary of our data.
+
+```{r}
+summary(ToothGrowth)
+```
+
+The 60 observations are split into two equally sized groups by the variable
+`supp`. Lets see how the length of the teeth relate to the dose grouped by the
+supplement type. We want to look at the dose as a factor. Therefore we add
+a new column `dosef` to our data before we create our plot.
+
+```{r}
+ToothGrowth$dosef <- factor(ToothGrowth$dose)
+
+bwplot(len ~ dosef | supp, data = ToothGrowth, horizontal = F,
+       xlab="dose", ylab="length")
+```
+
+There is only one outlier in the vitamin C group with 1 mg/day dosage. We can
+assume that the length of the teeth follows a normal distribution.
+
+With both types of supplement higher dosage seems to mean longer teeth.
+
+The supplement of vitamin C by orange juice seems to lead to longer teeth than
+with ascorbic acid, but only in lower dosages of 0.5 and 1 mg/day dosages; the
+difference seems to disappear in a 2 mg/day dosage. Interestingly the variance
+for the 2 mg/day seems much higher using ascorbic acid.
+
+## Testing our hypotheses
+
+### More vitamin c means longer teeth
+
+We state that a dose of 2 mg/day of vitamin C of either supplement type leads to
+longer teeth. $H_{0}: \mu = \mu_{0}$ vs. $H_{a}: \mu > \mu_{0}$.
+
+An unpaired, one-sided, two sample t-test is used to check our hypothesis.
+
+```{r}
+t.test(ToothGrowth[ToothGrowth$dose >  1,]$len,
+       ToothGrowth[ToothGrowth$dose <= 1,]$len,
+       alternative="greater")
+```
+
+With very high confidence $p < 0.001$ we can reject the null hypothesis and
+conclude that a dose of 2 mg/day leads to longer teeth than a dose of 0.5
+mg/day.
+
+### Supplement by orange juice leads to longer teeth than pure ascorbic acid
+
+We state that vitamin C supplemented by orange juice leads to longer teeth than
+pure ascorbic acid if the dose is 0.5 mg/day or 1 mg/day. $H_{0}: \mu = \mu_{0}$
+vs. $H_{a}: \mu > \mu_{0}$.
+
+Again an unpaired, one-sided, two sample t-test is used to check our hypothesis.
+
+```{r}
+t.test(ToothGrowth[ToothGrowth$dose < 2 & ToothGrowth$supp == "OJ",]$len,
+       ToothGrowth[ToothGrowth$dose < 2 & ToothGrowth$supp == "VC",]$len,
+       alternative="greater")
+```
+
+We can safely reject $H_{0}$ with $p = 0.002$ and conclude that the supplement
+by orange juice is more effective than pure ascorbic acid for smaller dosages
+under or equal to 1 mg/day.
