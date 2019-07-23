@@ -4,3 +4,6 @@
 [submodule "05_Reproducible_Research/Week2_Project"]
 	path = 05_Reproducible_Research/Week2_Project
 	url = git@github.com:olistroemer/dsc_05-01_project.git
+[submodule "08_Practical_Machine_Learning"]
+	path = 08_Practical_Machine_Learning
+	url = git@github.com:olistroemer/dsc_08_project.git
