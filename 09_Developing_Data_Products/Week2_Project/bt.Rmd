@@ -1,0 +1,28 @@
+---
+title: "Bermuda Triangle on a leaflet Map"
+author: "Oliver Stroemer"
+date: "2019-07-26"
+output: html_document
+---
+
+This map shows the location of the infamous [Bermuda
+Triangle](https://en.wikipedia.org/wiki/Bermuda_Triangle) in the western part of
+the North Atlantic Ocean. In other words it shows, where you shouldn't go on a
+boating trip. It is loosely defined by the area between the island Bermuda;
+Miami, FL and San Juan, PR.
+
+If you hover over the objects on the map, a tooltip appears -- magic :o).
+
+```{r echo=F,message=F}
+library(leaflet)
+
+edges <- data.frame(lat=c(32.271682, 25.787777, 18.451656),
+                    lng=c(-64.797158, -80.224165, -66.068867),
+                    label=c("Bermuda", "Miami, FL", "San Juan, PR"))
+
+edges %>%
+        leaflet() %>%
+        addTiles() %>%
+        addMarkers(label=edges$label) %>%
+        addPolygons(lat=edges$lat, lng=edges$lng, label = "Bermuda Triangle")
+``` 
