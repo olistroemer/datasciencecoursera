@@ -1,0 +1,49 @@
+---
+title: '`shiny`-App Featuring the `swiss` Data Set'
+author: "Oliver Stroemer"
+date: "2019-07-27"
+output: ioslides_presentation
+---
+
+## Overview
+
+This `shiny`-app is built to help you explore the `swiss` data set from the `datasets` package via linear regression lines.
+
+You can assign the different variables of the data set to the features of the plot like regressand, regressor, color and size of the geoms.
+
+```{r}
+names(swiss)
+```
+
+## Example Plot
+
+```{r echo=F}
+library(ggplot2)
+```
+
+The plots are made using the `ggplot2` package. Here is an example of the plots you can create with this app.
+
+```{r plot, fig.show="hide"}
+ggplot(swiss, aes(Agriculture, Fertility)) +
+        geom_point(aes(color=Examination, size=Education)) +
+        geom_smooth(method="lm")
+```
+
+The plot is on the next slide!
+
+***
+
+```{r ref.label="plot", echo=F}
+```
+
+Isn't that cool?
+
+## kthxbye
+
+Now you might try out the app; here's the link:
+
+[App on shinyapps.io](https://olistroemer.shinyapps.io/dsc_09-03_project/)
+
+If you are interested in the source code, you can find it here:
+
+[Repository on GitHub](https://github.com/olistroemer/datasciencecoursera/tree/master/09_Developing_Data_Products/Week4_Project)
