@@ -1,0 +1,43 @@
+---
+title: "`plotly`-Integration into a Presentation"
+author: "Oliver Stroemer"
+date: "2019-07-27"
+output: ioslides_presentation
+---
+
+## Load `plotly`
+
+First we need to load the library:
+
+```{r message=F}
+library(plotly)
+```
+
+
+## Plot some data
+
+We want to plot the `trees` data set from the `datasets` package with a
+regression line relating volume to height. Additionally we'll change the color
+of the points by the diameter of the tree (falsely labeled as `Girth` in the
+data set).
+
+```{r plot, message=F, fig.show='hide', results='hide'}
+data(trees)
+
+m <- lm(Volume ~ Height, data=trees)
+
+plot_ly(trees) %>%
+        add_markers(x=~Height, y=~Volume, type="scatter",
+                    color=~Girth, name="Volume ~ Height") %>%
+        add_trace(x=~Height, y=predict(m),
+                  mode="lines", name="Regression Line")
+```
+
+The plot is on the next slide.
+
+***
+
+```{r ref.label="plot", message=F, echo=F}
+```
+
+## kthxbye
