@@ -1,5 +1,5 @@
 ---
-title: 'Word Prediction Algorithm: Explorative Analysis'
+title: 'Word Prediction Algorithm: Exploratory Analysis'
 author: "Oliver Stroemer"
 date: "2020-04-07"
 output: html_document
@@ -20,7 +20,7 @@ set.seed(20200407)
 
 ## Synopsis
 
-This report aims to give me a brief explorative overview of the English part of
+This report aims to give me a brief exploratory overview of the English part of
 the course corpus, before I start designing the prediction algorithm.
 
 Since the full data set is really huge, I'll for now only look at a subset of
@@ -71,16 +71,18 @@ than that of a news article. Contrary is the median news article longer.
 
 ## Analyzing Single Words
 
+This is with how much words we have to deal:
+
 ```{r words}
 words <- corpus %>%
         select(-sets) %>%
         unnest_tokens("words", "text") %>%
         count(words, sort=T) %>%
         mutate(cum = cumsum(n))
-```
 
-Our sample corpus contains `r tail(words, 1)$cum` words; `r count(words)` of
-which are unique words.
+print(paste("Words:", tail(words, 1)$cum))
+print(paste("Unique Words:", count(words)))
+```
 
 ```{r cloud}
 with(words, wordcloud(words, n, max.words=50))
