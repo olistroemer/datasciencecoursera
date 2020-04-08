@@ -1,0 +1,164 @@
+---
+title: 'Word Prediction Algorithm: Explorative Analysis'
+author: "Oliver Stroemer"
+date: "2020-04-07"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+```{r init, include=F}
+library(dplyr)
+library(tidytext)
+library(tidyr)
+library(LaF)
+
+
+set.seed(20200407)
+```
+
+## Synopsis
+
+This report aims to give me a brief explorative overview of the English part of
+the course corpus, before I start designing the prediction algorithm.
+
+Since the full dataset is really huge, I'll for now only look at a subset of the
+data. 50K lines of each set should suffice to get a brief overview.
+
+I use the `tidytext` package to split the corpora into n-grams and analyze the
+frequencies of their occurences.
+
+## Analyzing length of data entries
+
+```{r download, cache=T}
+download.file("https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip",
+              "dataset.zip")
+unzip("dataset.zip")
+```
+
+```{r read}
+sets <- c("blogs", "news", "twitter")
+corpus <- tibble(sets) %>%
+        mutate(text = lapply(sets, function(set) sample_lines(paste0("final/en_US/en_US.", set, ".txt"), 50000))) %>%
+        unnest("text")
+```
+
+Let's first have a look at the length of the entries in characters.
+
+```{r summarize}
+summary <- corpus %>%
+        mutate(ln = nchar(text)) %>%
+        group_by(sets) %>%
+        summarize(min=min(ln),median=median(ln),mean=mean(ln),max=max(ln))
+
+summary
+
+```
+
+This is really interesting. The twitter data seems to be from the time, when
+tweets were limited to 140 characters. Why is there at least one tweet with 141
+characters? The files are in DOS-format, which means that there is an additional
+carriage return character at the end of each line. The line sampling function
+doesn't account for this fact.
+
+The distribution seems to be left skewed since the mean is in all three sets
+bigger than the median. This is also backed by the fact, that the maximum length
+of the blogs and the news set is an order of magnitude higher than the mean. The
+skewness is much more extreme in the blogs set than in the twitter one. It's
+also interesting that the mean length of a blog posting in our set is higher
+than that of a news article. Contrary is the median news article longer.
+
+## Analyzing Single Words
+
+```{r words}
+words <- corpus %>%
+        select(-sets) %>%
+        unnest_tokens("words", "text") %>%
+        count(words, sort=T) %>%
+        mutate(cum = cumsum(n))
+```
+
+Our sample corpus contains `r tail(words, 1)$cum` words; `r count(words)` of
+which are unique words.
+
+```{r cloud}
+with(words, wordcloud(words, n, max.words=50))
+```
+
+Unsurprisingly the top 50 words are all stop words.
+
+Let's have a look at how many unique words we need to cover 50 % and 90 % of the
+corpus.
+
+```{r wordcoverage}
+with(words, plot(cum, log="x", xlab="", ylab=""))
+title(main = "Relationship of the number of unique words to corpus coverage"
+     ,xlab = "Index of word by number of occurences"
+     ,ylab = "Cumulative sum of covered words")
+abline(h=tail(words, 1)$cum * .5)
+abline(h=tail(words, 1)$cum * .9)
+```
+
+We see, the bigger part of our unique words doesn't really add much to our
+overall coverage. This is something I need to keep in mind, when I design the
+prediction model.
+
+## Analyzing Bi- and Trigrams
+
+```{r bigrams}
+bigrams <- corpus %>%
+        select(-sets) %>%
+        unnest_tokens("bigrams", "text", token="ngrams", n=2) %>%
+        count(bigrams, sort=T) %>%
+        mutate(cum = cumsum(n))
+```
+
+```{r bicoverage}
+with(bigrams, plot(cum, log="x", xlab="", ylab=""))
+title(main = "Relationship of the number of unique bigrams to corpus coverage"
+     ,xlab = "Index of bigram by number of occurences"
+     ,ylab = "Cumulative sum of covered bigrams")
+abline(h=tail(bigrams, 1)$cum * .5)
+abline(h=tail(bigrams, 1)$cum * .9)
+```
+
+Wow... They are many. Unlike with the single words we need close to a million
+unique bigrams to cover 90 % of our corpus. I expect this to become even worse
+if we look at our trigrams. Because of the long computation time needed, I use a
+smaller subset of only 30 % of the previous corpus.
+
+```{r trigrams}
+trigrams <- corpus %>%
+        select(-sets) %>%
+        sample_frac(.3) %>%
+        unnest_tokens("trigrams", "text", token="ngrams", n=3) %>%
+        count(trigrams, sort=T) %>%
+        mutate(cum = cumsum(n))
+```
+
+```{r tricoverage}
+with(trigrams, plot(cum, log="x", xlab="", ylab=""))
+title(main = "Relationship of the number of unique trigrams to corpus coverage"
+     ,xlab = "Index of trigram by number of occurences"
+     ,ylab = "Cumulative sum of covered trigrams")
+abline(h=tail(trigrams, 1)$cum * .5)
+abline(h=tail(trigrams, 1)$cum * .9)
+```
+
+As predicted the impact of each new trigram we add to our pool becomes rapidly
+smaller and smaller. Luckily we can eliminate some of the trigrams in our model,
+because we only need the prediction with the highest probability.
+
+## Conclusions and Prospect
+
+I will use a n-gram based prediction algorithm. Most importantly I need to
+reduce the number of n-grams in the pool while preserving as much accuracy as
+possible.
+
+The model must not predict any profanity words. There are R packages like
+`sentimentr` that provide dictionaries which I can use.
+
+## References
+
+Silge & Robinson (2020) *Text Mining with R* [https://www.tidytextmining.com/]
