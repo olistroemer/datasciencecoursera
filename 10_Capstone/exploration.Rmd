@@ -5,7 +5,7 @@ date: "2020-04-07"
 output: html_document
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(echo = F, cache = T)
 ```
 
 ```{r init, include=F}
@@ -13,7 +13,7 @@ library(dplyr)
 library(tidytext)
 library(tidyr)
 library(LaF)
-
+library(wordcloud)
 
 set.seed(20200407)
 ```
@@ -23,15 +23,15 @@ set.seed(20200407)
 This report aims to give me a brief explorative overview of the English part of
 the course corpus, before I start designing the prediction algorithm.
 
-Since the full dataset is really huge, I'll for now only look at a subset of the
-data. 50K lines of each set should suffice to get a brief overview.
+Since the full data set is really huge, I'll for now only look at a subset of
+the data. 50K lines of each set should suffice to get a brief overview.
 
 I use the `tidytext` package to split the corpora into n-grams and analyze the
 frequencies of their occurrences.
 
 ## Analyzing length of data entries
 
-```{r download, cache=T}
+```{r download}
 download.file("https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip",
               "dataset.zip")
 unzip("dataset.zip")
@@ -157,8 +157,9 @@ reduce the number of n-grams in the pool while preserving as much accuracy as
 possible.
 
 The model must not predict any profanity words. There are R packages like
-`sentimentr` that provide dictionaries which I can use.
+`sentimentr` that provide dictionaries which I can use to filter such
+predictions.
 
 ## References
 
-Silge & Robinson (2020) *Text Mining with R* [https://www.tidytextmining.com/]
+Silge & Robinson (2020) *Text Mining with R* https://www.tidytextmining.com/
