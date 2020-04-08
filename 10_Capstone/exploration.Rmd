@@ -27,7 +27,7 @@ Since the full dataset is really huge, I'll for now only look at a subset of the
 data. 50K lines of each set should suffice to get a brief overview.
 
 I use the `tidytext` package to split the corpora into n-grams and analyze the
-frequencies of their occurences.
+frequencies of their occurrences.
 
 ## Analyzing length of data entries
 
@@ -94,7 +94,7 @@ corpus.
 ```{r wordcoverage}
 with(words, plot(cum, log="x", xlab="", ylab=""))
 title(main = "Relationship of the number of unique words to corpus coverage"
-     ,xlab = "Index of word by number of occurences"
+     ,xlab = "Index of word by number of occurrences"
      ,ylab = "Cumulative sum of covered words")
 abline(h=tail(words, 1)$cum * .5)
 abline(h=tail(words, 1)$cum * .9)
@@ -117,7 +117,7 @@ bigrams <- corpus %>%
 ```{r bicoverage}
 with(bigrams, plot(cum, log="x", xlab="", ylab=""))
 title(main = "Relationship of the number of unique bigrams to corpus coverage"
-     ,xlab = "Index of bigram by number of occurences"
+     ,xlab = "Index of bigram by number of occurrences"
      ,ylab = "Cumulative sum of covered bigrams")
 abline(h=tail(bigrams, 1)$cum * .5)
 abline(h=tail(bigrams, 1)$cum * .9)
@@ -140,7 +140,7 @@ trigrams <- corpus %>%
 ```{r tricoverage}
 with(trigrams, plot(cum, log="x", xlab="", ylab=""))
 title(main = "Relationship of the number of unique trigrams to corpus coverage"
-     ,xlab = "Index of trigram by number of occurences"
+     ,xlab = "Index of trigram by number of occurrences"
      ,ylab = "Cumulative sum of covered trigrams")
 abline(h=tail(trigrams, 1)$cum * .5)
 abline(h=tail(trigrams, 1)$cum * .9)
