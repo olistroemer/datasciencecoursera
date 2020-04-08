@@ -23,7 +23,7 @@ set.seed(20200407)
 This report aims to give me a brief exploratory overview of the English part of
 the course corpus, before I start designing the prediction algorithm.
 
-Since the full data set is really huge, I'll for now only look at a subset of
+Since the full data set is really huge, I will for now only look at a subset of
 the data. 50K lines of each set should suffice to get a brief overview.
 
 I use the `tidytext` package to split the corpora into n-grams and analyze the
@@ -44,7 +44,7 @@ corpus <- tibble(sets) %>%
         unnest("text")
 ```
 
-Let's first have a look at the length of the entries in characters.
+Let us first have a look at the length of the entries in characters.
 
 ```{r summarize}
 summary <- corpus %>%
@@ -60,18 +60,19 @@ This is really interesting. The twitter data seems to be from the time, when
 tweets were limited to 140 characters. Why is there at least one tweet with 141
 characters? The files are in DOS-format, which means that there is an additional
 carriage return character at the end of each line. The line sampling function
-doesn't account for this fact.
+does not account for this fact.
 
-The distribution seems to be left skewed since the mean is in all three sets
-bigger than the median. This is also backed by the fact, that the maximum length
-of the blogs and the news set is an order of magnitude higher than the mean. The
-skewness is much more extreme in the blogs set than in the twitter one. It's
-also interesting that the mean length of a blog posting in our set is higher
-than that of a news article. Contrary is the median news article longer.
+The distribution seems to be left skewed since the mean in each of the three
+sets is bigger than the median. This is also backed by the fact, that the
+maximum length of the blogs and the news set are an order of magnitude higher
+than the mean. The skewness is much more extreme in the blogs set than in the
+twitter set. It is also interesting that the mean length of a blog posting in
+our set is higher than the mean length of a news article. However the median of
+the blog postings is shorter.
 
 ## Analyzing Single Words
 
-This is with how much words we have to deal:
+This is how many words we have to deal with:
 
 ```{r words}
 words <- corpus %>%
@@ -90,8 +91,8 @@ with(words, wordcloud(words, n, max.words=50))
 
 Unsurprisingly the top 50 words are all stop words.
 
-Let's have a look at how many unique words we need to cover 50 % and 90 % of the
-corpus.
+Let us now have a look at how many unique words we need to cover 50 % and 90 %
+of the corpus.
 
 ```{r wordcoverage}
 with(words, plot(cum, log="x", xlab="", ylab=""))
@@ -102,7 +103,7 @@ abline(h=tail(words, 1)$cum * .5)
 abline(h=tail(words, 1)$cum * .9)
 ```
 
-We see, the bigger part of our unique words doesn't really add much to our
+We see, the bigger part of our unique words does not really add much to our
 overall coverage. This is something I need to keep in mind, when I design the
 prediction model.
 
@@ -125,7 +126,7 @@ abline(h=tail(bigrams, 1)$cum * .5)
 abline(h=tail(bigrams, 1)$cum * .9)
 ```
 
-Wow... They are many. Unlike with the single words we need close to a million
+Wow... They are many. Unlike with the single words, we need close to a million
 unique bigrams to cover 90 % of our corpus. I expect this to become even worse
 if we look at our trigrams. Because of the long computation time needed, I use a
 smaller subset of only 30 % of the previous corpus.
@@ -148,9 +149,9 @@ abline(h=tail(trigrams, 1)$cum * .5)
 abline(h=tail(trigrams, 1)$cum * .9)
 ```
 
-As predicted the impact of each new trigram we add to our pool becomes rapidly
-smaller and smaller. Luckily we can eliminate some of the trigrams in our model,
-because we only need the prediction with the highest probability.
+As predicted, the impact of each new trigram, which we add to our pool, becomes
+rapidly smaller and smaller. Luckily we can eliminate some of the trigrams in
+our model, because we only need the prediction with the highest probability.
 
 ## Conclusions and Prospect
 
